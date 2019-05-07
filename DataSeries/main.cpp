@@ -88,8 +88,14 @@ public:
 	}
 
 	DataSeries<T> shift(long int shift) {
-		DataSeries<T> shiftedDataSeries = *this;
-		shiftedDataSeries._vector.erase(_vector.begin(), _vector.begin());
+		DataSeries<T> shiftedDataSeries;
+		std::vector<std::shared_ptr<T>> tempVector;
+
+		for (unsigned int i = -shift; i < _vector.size(); ++i) {
+			tempVector.push_back(_vector[i]);
+		}
+		
+		shiftedDataSeries._vector = tempVector;
 		return shiftedDataSeries;
 	}
 	
