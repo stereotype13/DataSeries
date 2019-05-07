@@ -86,6 +86,12 @@ public:
 		Iterator<T> end{ _vector[_vector.size() - 1], &_vector };
 		return end;
 	}
+
+	DataSeries<T> shift(long int shift) {
+		DataSeries<T> shiftedDataSeries = *this;
+		shiftedDataSeries._vector.erase(_vector.begin(), _vector.begin());
+		return shiftedDataSeries;
+	}
 	
 	
 };
@@ -114,6 +120,8 @@ int main(int argc, char* argv[]) {
 
 	for (const auto& i : series)
 		std::cout << i << std::endl;
+
+	DataSeries<double> shifted = series.shift(-1);
 
 	std::cin.get();
 
