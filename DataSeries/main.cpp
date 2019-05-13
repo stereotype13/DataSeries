@@ -111,7 +111,6 @@ public:
 		
 		T& operator*() {
 			if (*it == nullptr) {
-				std::cout << "NaN";
 			
 				T temp;
 				memset(&temp, 0, sizeof(T));
@@ -169,6 +168,106 @@ public:
 	}
 	
 	
+};
+
+//test
+class OHLC {
+public:
+	double Open, High, Low, Close;
+	bool isNaN = true;
+
+	OHLC() = default;
+	OHLC(double open, double high, double low, double close) : Open{ open }, High{ high }, Low{ low }, Close{ close }, isNaN{ false } { }
+	OHLC(const OHLC& other) : Open{ other.Open }, High{ other.High }, Low{ other.Low }, Close{ other.Close }, isNaN{ other.isNaN } {}
+
+	OHLC& operator=(const OHLC& other) {
+		if (this == &other)
+			return *this;
+
+		Open = other.Open;
+		High = other.High;
+		Low = other.Low;
+		Close = other.Close;
+		isNaN = other.isNaN;
+
+		return *this;
+	}
+	
+	OHLC(OHLC&& other) {
+		std::swap(Open, other.Open);
+		std::swap(High, other.Open);
+		std::swap(Low, other.Open);
+		std::swap(Close, other.Open);
+		std::swap(isNaN, other.isNaN);
+	}
+
+	OHLC& operator=(OHLC&& other) {
+		std::swap(Open, other.Open);
+		std::swap(High, other.Open);
+		std::swap(Low, other.Open);
+		std::swap(Close, other.Open);
+		std::swap(isNaN, other.isNaN);
+
+		return *this;
+	}
+
+	OHLC& operator/(const OHLC& other) {
+		OHLC temp;
+		temp.Open = Open / other.Open;
+		temp.High = High / other.High;
+		temp.Low = Low / other.Low;
+		temp.Close = Close / other.Close;
+
+		temp.isNaN = isNaN;
+
+		return temp;
+	}
+
+	OHLC& operator/(double n) {
+		OHLC temp;
+		temp.Open = Open / n;
+		temp.High = High / n;
+		temp.Low = Low / n;
+		temp.Close = Close / n;
+
+		temp.isNaN = isNaN;
+
+		return temp;
+	}
+
+	OHLC& operator*(const OHLC& other) {
+		OHLC temp;
+		temp.Open = Open * other.Open;
+		temp.High = High * other.High;
+		temp.Low = Low * other.Low;
+		temp.Close = Close * other.Close;
+
+		temp.isNaN = isNaN;
+
+		return temp;
+	}
+
+	OHLC& operator*(double n) {
+		OHLC temp;
+		temp.Open = Open * n;
+		temp.High = High * n;
+		temp.Low = Low * n;
+		temp.Close = Close * n;
+
+		temp.isNaN = isNaN;
+
+		return temp;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const OHLC& ohlc) {
+		if (ohlc.isNaN) {
+			os << "NaN";
+			return os;
+		}
+			
+		os << ohlc.Open << '\t' << ohlc.High << '\t' << ohlc.Low << '\t' << ohlc.Close;
+		return os;
+	}
 };
 
 int main(int argc, char* argv[]) {
