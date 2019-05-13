@@ -13,7 +13,7 @@ private:
 public:
 
 	DataSeries<T>() {
-		_vector.push_back(std::shared_ptr<T>());
+		//_vector.push_back(std::shared_ptr<T>());
 	}
 
 	T& operator[](long int index) {
@@ -27,64 +27,69 @@ public:
 
 		auto t = std::make_shared<T>();
 		_map[dateTime] = t;
-		_vector.pop_back();
 		_vector.push_back(t);
-		_vector.push_back(std::shared_ptr<T>());
 		return *t;
 	}
 
 	void operator*(double n) {
-		for (unsigned int i = 0; i < _vector.size() - 1; ++i)
+		for (unsigned int i = 0; i < _vector.size(); ++i)
 			*(_vector[i]) = *(_vector[i]) * n;
 	}
 
 	void operator*(const DataSeries<T>& other) {
-		for (unsigned int i = 0; i < _vector.size() - 1; ++i)
-			*(_vector[i]) = *(_vector[i]) * *(other._vector[i]);
+		std::vector<std::shared_ptr<T>> tempVector;
+		for (unsigned int i = 0; i < _vector.size(); ++i)
+			tempVector.push_back(std::make_shared<T>(*(_vector[i]) * *(other._vector[i])));
+
+		_vector.clear();
+		_vector = tempVector;
 	}
 
 	void operator/(double n) {
-		for (unsigned int i = 0; i < _vector.size() - 1; ++i)
+		for (unsigned int i = 0; i < _vector.size(); ++i)
 			*(_vector[i]) = *(_vector[i]) / n;
 	}
 
 	void operator/(const DataSeries<T>& other) {
-		for (unsigned int i = 0; i < _vector.size() - 1; ++i)
-			*(_vector[i]) = *(_vector[i]) / *(other._vector[i]);
+		std::vector<std::shared_ptr<T>> tempVector;
+		for (unsigned int i = 0; i < _vector.size(); ++i)
+			tempVector.push_back(std::make_shared<T>(*(_vector[i]) / *(other._vector[i])));
+
+		_vector.clear();
+		_vector = tempVector;
 	}
 
-	template <class T>
+
 	class Iterator {
-		std::shared_ptr<T> t;
-		std::vector<std::shared_ptr<T>>* vec;
-		unsigned int index = 0;
 	public:
-		Iterator<T>(std::shared_ptr<T> t, std::vector<std::shared_ptr<T>>* vec) : t{ t }, vec{ vec } {
-
-		}
-
+		typename std::vector<std::shared_ptr<T>>::iterator it;
+		
 		T& operator*() {
-			return *t;
+			return **it;
 		}
 
-		void operator++() {
-			t = (*vec)[++index];
+		Iterator& operator++() {
+			++it;
+			return *this;
 		}
 
-		bool operator!=(const Iterator<T>& other) {
-			return t != other.t;
+		bool operator!=(const Iterator& other) {
+			return this->it != other.it;
 		}
+		
 	};
 
 	
-	Iterator<T> begin() {
-		Iterator<T> begin{ _vector[0], &_vector };
-		return begin;
+	Iterator begin() {
+		Iterator iterator;
+		iterator.it = _vector.begin();
+		return iterator;
 	}
 
-	Iterator<T> end() {
-		Iterator<T> end{ _vector[_vector.size() - 1], &_vector };
-		return end;
+	Iterator end() {
+		Iterator iterator;
+		iterator.it = _vector.end();
+		return iterator;
 	}
 
 	DataSeries<T> shift(long int shift) {
@@ -92,7 +97,7 @@ public:
 		std::vector<std::shared_ptr<T>> tempVector;
 
 		for (unsigned int i = -shift; i < _vector.size(); ++i) {
-			tempVector.push_back(_vector[i]);
+			tempVector.push_back(std::make_shared<T>(*(_vector[i])));
 		}
 		
 		shiftedDataSeries._vector = tempVector;
@@ -109,13 +114,24 @@ int main(int argc, char* argv[]) {
 	series["2019/5/7"] = 2.71;
 	series["2019/5/8"] = 1.23;
 
+	DataSeries<double> returns = series.shift(-1);
+	returns / series;
+
+	for (const auto& i : returns)
+		std::cout << i << std::endl;
+
+	std::cout << std::endl;
+
+
+
 	for (const auto& i : series)
 		std::cout << i << std::endl;
 
 	std::cout << std::endl;
 
-	series * 2;
+	
 	series / series[0];
+	series * 2;
 
 	for (const auto& i : series)
 		std::cout << i << std::endl;
