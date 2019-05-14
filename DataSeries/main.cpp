@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include "decimal.h"
+
 template <class T>
 class DataSeries {
 private:
@@ -271,114 +273,7 @@ public:
 	}
 };
 
-class Decimal {
-private:
-	double _value;
-	bool _isNaN;
 
-public:
-	Decimal() : _value{ 0.0 }, _isNaN{ true } {}
-	Decimal(const double value) : _value{ value }, _isNaN{ false } {}
-	Decimal(const Decimal& other) : _value{ other._value }, _isNaN{ other._isNaN } {}
-	
-	Decimal(Decimal&& other) : _value{ 0.0 }, _isNaN{ true } {
-		std::swap(_value, other._value);
-		std::swap(_isNaN, other._isNaN);
-	}
-
-	Decimal operator=(const Decimal& other) {
-		if (this == &other)
-			return *this;
-
-		_value = other._value;
-		_isNaN = other._isNaN;
-
-		return *this;
-	}
-
-	Decimal operator=(Decimal&& other) {
-		std::swap(_value, other._value);
-		std::swap(_isNaN, other._isNaN);
-
-		return *this;
-	}
-
-	Decimal operator+(const double value) {
-		return this->_value + value;
-	}
-
-	Decimal operator+(const Decimal& other) {
-		return this->_value + other._value;
-	}
-
-	Decimal operator-(const double value) {
-		return this->_value - value;
-	}
-
-	Decimal operator-(const Decimal& other) {
-		return this->_value - other._value;
-	}
-
-	Decimal operator*(const double value) {
-		return this->_value * value;
-	}
-
-	Decimal operator*(const Decimal& other) {
-		return this->_value * other._value;
-	}
-
-	Decimal operator/(const double value) {
-		return this->_value / value;
-	}
-
-	Decimal operator/(const Decimal& other) {
-		return this->_value / other._value;
-	}
-
-	//////////////
-	void operator+=(const double value) {
-		this->_value += value;
-	}
-
-	void operator+=(const Decimal& other) {
-		this->_value += other._value;
-	}
-
-	void operator-=(const double value) {
-		this->_value -= value;
-	}
-
-	void operator-=(const Decimal& other) {
-		this->_value -= other._value;
-	}
-
-	void operator*=(const double value) {
-		this->_value *= value;
-	}
-
-	void operator*=(const Decimal& other) {
-		this->_value *= other._value;
-	}
-
-	void operator/=(const double value) {
-		this->_value /= value;
-	}
-
-	void operator/=(const Decimal& other) {
-		this->_value /= other._value;
-	}
-
-
-	friend std::ostream& operator<<(std::ostream& os, const Decimal& Decimal) {
-		if (Decimal._isNaN) {
-			os << "NaN";
-			return os;
-		}
-
-		os << Decimal._value;
-		return os;
-	}
-};
 
 int main(int argc, char* argv[]) {
 
