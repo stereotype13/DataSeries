@@ -109,7 +109,7 @@ public:
 	public:
 		typename std::vector<std::shared_ptr<T>>::iterator it;
 		
-		T& operator*() {
+		T operator*() {
 			if (*it == nullptr) {
 			
 				T temp;
@@ -153,7 +153,8 @@ public:
 		}
 		else {
 			for (unsigned int i = 0; i < shift; ++i) {
-				tempVector.push_back(std::shared_ptr<T>());
+				T temp;
+				tempVector.push_back(std::make_shared<T>(temp));
 			}
 			shift = 0;
 		}
@@ -195,23 +196,23 @@ public:
 	
 	OHLC(OHLC&& other) {
 		std::swap(Open, other.Open);
-		std::swap(High, other.Open);
-		std::swap(Low, other.Open);
-		std::swap(Close, other.Open);
+		std::swap(High, other.High);
+		std::swap(Low, other.Low);
+		std::swap(Close, other.Close);
 		std::swap(isNaN, other.isNaN);
 	}
 
 	OHLC& operator=(OHLC&& other) {
 		std::swap(Open, other.Open);
-		std::swap(High, other.Open);
-		std::swap(Low, other.Open);
-		std::swap(Close, other.Open);
+		std::swap(High, other.High);
+		std::swap(Low, other.Low);
+		std::swap(Close, other.Close);
 		std::swap(isNaN, other.isNaN);
 
 		return *this;
 	}
 
-	OHLC& operator/(const OHLC& other) {
+	OHLC operator/(const OHLC& other) {
 		OHLC temp;
 		temp.Open = Open / other.Open;
 		temp.High = High / other.High;
@@ -223,7 +224,7 @@ public:
 		return temp;
 	}
 
-	OHLC& operator/(double n) {
+	OHLC operator/(double n) {
 		OHLC temp;
 		temp.Open = Open / n;
 		temp.High = High / n;
@@ -235,7 +236,7 @@ public:
 		return temp;
 	}
 
-	OHLC& operator*(const OHLC& other) {
+	OHLC operator*(const OHLC& other) {
 		OHLC temp;
 		temp.Open = Open * other.Open;
 		temp.High = High * other.High;
@@ -247,7 +248,7 @@ public:
 		return temp;
 	}
 
-	OHLC& operator*(double n) {
+	OHLC operator*(double n) {
 		OHLC temp;
 		temp.Open = Open * n;
 		temp.High = High * n;
@@ -261,11 +262,120 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, const OHLC& ohlc) {
 		if (ohlc.isNaN) {
-			os << "NaN";
+			os << "NaN" << '\t' << "NaN" << '\t' << "NaN" << '\t' << "NaN";
 			return os;
 		}
 			
 		os << ohlc.Open << '\t' << ohlc.High << '\t' << ohlc.Low << '\t' << ohlc.Close;
+		return os;
+	}
+};
+
+class Decimal {
+private:
+	double _value;
+	bool _isNaN;
+
+public:
+	Decimal() : _value{ 0.0 }, _isNaN{ true } {}
+	Decimal(const double value) : _value{ value }, _isNaN{ false } {}
+	Decimal(const Decimal& other) : _value{ other._value }, _isNaN{ other._isNaN } {}
+	
+	Decimal(Decimal&& other) : _value{ 0.0 }, _isNaN{ true } {
+		std::swap(_value, other._value);
+		std::swap(_isNaN, other._isNaN);
+	}
+
+	Decimal operator=(const Decimal& other) {
+		if (this == &other)
+			return *this;
+
+		_value = other._value;
+		_isNaN = other._isNaN;
+
+		return *this;
+	}
+
+	Decimal operator=(Decimal&& other) {
+		std::swap(_value, other._value);
+		std::swap(_isNaN, other._isNaN);
+
+		return *this;
+	}
+
+	Decimal operator+(const double value) {
+		return this->_value + value;
+	}
+
+	Decimal operator+(const Decimal& other) {
+		return this->_value + other._value;
+	}
+
+	Decimal operator-(const double value) {
+		return this->_value - value;
+	}
+
+	Decimal operator-(const Decimal& other) {
+		return this->_value - other._value;
+	}
+
+	Decimal operator*(const double value) {
+		return this->_value * value;
+	}
+
+	Decimal operator*(const Decimal& other) {
+		return this->_value * other._value;
+	}
+
+	Decimal operator/(const double value) {
+		return this->_value / value;
+	}
+
+	Decimal operator/(const Decimal& other) {
+		return this->_value / other._value;
+	}
+
+	//////////////
+	void operator+=(const double value) {
+		this->_value += value;
+	}
+
+	void operator+=(const Decimal& other) {
+		this->_value += other._value;
+	}
+
+	void operator-=(const double value) {
+		this->_value -= value;
+	}
+
+	void operator-=(const Decimal& other) {
+		this->_value -= other._value;
+	}
+
+	void operator*=(const double value) {
+		this->_value *= value;
+	}
+
+	void operator*=(const Decimal& other) {
+		this->_value *= other._value;
+	}
+
+	void operator/=(const double value) {
+		this->_value /= value;
+	}
+
+	void operator/=(const Decimal& other) {
+		this->_value /= other._value;
+	}
+
+
+	friend std::ostream& operator<<(std::ostream& os, const Decimal& Decimal) {
+		if (Decimal._isNaN) {
+			os << "NaN";
+			return os;
+		}
+
+		os << Decimal._value;
 		return os;
 	}
 };
@@ -312,6 +422,40 @@ int main(int argc, char* argv[]) {
 
 	for (const auto& i : shifted)
 		std::cout << i << std::endl;
+
+	std::cout << std::endl;
+
+	DataSeries<OHLC> series2;
+
+	series2["2019/5/6"] = OHLC{ 40, 65, 35, 60 };
+	series2["2019/5/7"] = OHLC{ 55, 60, 45, 50 };
+	series2["2019/5/8"] = OHLC{ 60, 80, 60, 70 };
+
+	for (const auto& i : series2)
+		std::cout << i << std::endl;
+
+	std::cout << std::endl;
+
+	DataSeries<OHLC> returns2 = series2.shift(-1);
+	returns2 /= series2;
+
+	for (const auto& i : returns2)
+		std::cout << i << std::endl;
+
+	std::cout << std::endl;
+
+	DataSeries<Decimal> Decimals;
+	Decimals["2019/5/6"] = 3.14;
+	Decimals["2019/5/7"] = 2.71;
+	Decimals["2019/5/8"] = 1.23;
+
+	Decimals[0] = Decimals[1] + Decimals[2];
+
+	std::cout << "Decimals[0] = " << Decimals[0] << std::endl;
+
+	Decimals = Decimals.shift(1);
+	std::cout << "Decimals[0] = " << Decimals[0] << std::endl;
+	std::cout << "Decimals[1] = " << Decimals[1] << std::endl;
 
 	std::cin.get();
 
